@@ -10,6 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 
+import selim.core.commands.CommandPluginVersion;
+import selim.core.commands.CommandPluginVersion.TabCompleterPluginVersion;
 import selim.core.commands.CommandViewRecipe;
 import selim.core.commands.CommandViewRecipe.TabCompleterViewRecipe;
 import selim.core.events.GameTickEvent;
@@ -75,6 +77,8 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		Config.init(this.getConfig());
 		this.getCommand("viewrecipe").setExecutor(new CommandViewRecipe());
 		this.getCommand("viewrecipe").setTabCompleter(new TabCompleterViewRecipe());
+		this.getCommand("pluginversion").setExecutor(new CommandPluginVersion());
+		this.getCommand("pluginversion").setTabCompleter(new TabCompleterPluginVersion());
 		RecipeUtils.initRecipes();
 
 		// MANAGER.registerEvents(new MachineEventListener(), this);
