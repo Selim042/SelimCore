@@ -16,7 +16,7 @@ public class CommandPluginVersion implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length != 1) {
-			sender.sendMessage(ChatColor.RED + command.getUsage());
+			sender.sendMessage(ChatColor.RED + "Usage: " + command.getUsage());
 			return true;
 		}
 		Plugin plugin = Bukkit.getPluginManager().getPlugin(args[0]);
