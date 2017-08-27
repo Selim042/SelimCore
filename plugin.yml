@@ -1,0 +1,11 @@
+name: SelimCore
+main: selim.core.SelimCore
+depend: [ProtocolLib]
+version: 1.1.2
+commands:
+  selimcoreversion:
+    description: Gets the current version of the plugin.
+    usage: /selimcoreversion
+  viewrecipe:
+    description: View recipes registered with SelimCore and most vanilla recipes.
+    usage: /viewrecipe <name> [num]
