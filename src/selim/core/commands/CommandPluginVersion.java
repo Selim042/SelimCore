@@ -20,7 +20,7 @@ public class CommandPluginVersion implements CommandExecutor {
 			return true;
 		}
 		Plugin plugin = Bukkit.getPluginManager().getPlugin(args[0]);
-		sender.sendMessage(args[0] + " version: " + plugin.getDescription().getVersion());
+		sender.sendMessage("Installed " + args[0] + " version: " + plugin.getDescription().getVersion());
 		return true;
 	}
 

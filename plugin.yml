@@ -1,7 +1,7 @@
 name: SelimCore
 main: selim.core.SelimCore
 depend: [ProtocolLib]
-version: 1.2.0
+version: 1.2.1
 commands:
   viewrecipe:
     description: View recipes registered with SelimCore and most vanilla recipes.

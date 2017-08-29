@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -90,7 +91,8 @@ public class EventListener implements Listener {
 
 	@EventHandler
 	public void onInventoryEvent(InventoryClickEvent event) {
-		if (event.getInventory().getName().equals(RecipeUtils.RECIPE_INV_NAME)
+		if (event.getAction() != InventoryAction.CLONE_STACK
+				&& event.getInventory().getName().equals(RecipeUtils.RECIPE_INV_NAME)
 				&& (event.getSlotType() == SlotType.CRAFTING || event.getSlotType() == SlotType.RESULT))
 			event.setCancelled(true);
 	}
