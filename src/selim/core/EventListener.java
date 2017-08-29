@@ -2,16 +2,22 @@ package selim.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 import selim.core.events.PluginsLoadedEvent;
 import selim.core.util.RecipeUtils;
@@ -20,6 +26,7 @@ import selim.core.util.VersionChecker;
 
 public class EventListener implements Listener {
 
+	private static final Random rand = new Random();
 	private static final List<SelimCorePlugin> enabledPlugins = new ArrayList<SelimCorePlugin>();
 	private static final List<SelimCorePlugin> disabledPlugins = new ArrayList<SelimCorePlugin>();
 
@@ -97,10 +104,19 @@ public class EventListener implements Listener {
 			event.setCancelled(true);
 	}
 
-	// @EventHandler
-	// public void onPrepareRecipe(CraftItemEvent event) {
-	// if (RecipeUtils.getRecipeName(event.getRecipe()) == null)
-	// event.setCancelled(true);
-	// }
+	@EventHandler
+	public void onPrepareRecipe(CraftItemEvent event) {
+		ItemStack result = event.getRecipe().getResult();
+		NbtCompound nbt = (NbtCompound) NbtFactory.fromItemTag(result);
+		if (nbt.containsKey("dif")) {
+			try {
+				nbt.getList("dif");
+				nbt.put("dif", new int[] { rand.nextInt(), rand.nextInt(), rand.nextInt() });
+				NbtFactory.setItemTag(result, nbt);
+			} catch (IllegalArgumentException e) {
+				return;
+			}
+		}
+	}
 
 }
