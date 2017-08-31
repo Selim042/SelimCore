@@ -14,20 +14,20 @@ import selim.core.events.GameTickEvent;
 
 public class ScoreboardManager implements Listener {
 
-	private static final List<Scoreboard<ScoreTracker<?>>> BOARDS = new LinkedList<Scoreboard<ScoreTracker<?>>>();
+	private static final List<Scoreboard> BOARDS = new LinkedList<Scoreboard>();
 
 	@EventHandler
 	public void updateScoreBoards(GameTickEvent event) {
-		for (Scoreboard<ScoreTracker<?>> sb : BOARDS) {
+		for (Scoreboard sb : BOARDS) {
 			Block block = sb.getLocation().getBlock();
 			BlockState state = block.getState();
 			if (state instanceof Sign) {
 				Sign sign = (Sign) state;
-				ScoreTracker<?> st = ScoreTracker.getTracker(sb.getTrackerID());
+				ScoreTracker st = ScoreTracker.getTracker(sb.getTrackerID());
 				if (st == null || !st.hasUpdated())
 					return;
 				int place = sb.getPlace();
-				Score<?> score = st.getPlace(place);
+				Score score = st.getPlace(place);
 				sign.setLine(0,
 						ChatColor.GOLD + "[ " + ChatColor.RESET + st.getName() + ChatColor.GOLD + " ]");
 				sign.setLine(1, score + " place");

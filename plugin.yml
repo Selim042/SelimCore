@@ -1,7 +1,7 @@
 name: SelimCore
 main: selim.core.SelimCore
 depend: [ProtocolLib]
-version: 1.2.1
+version: 1.3.0
 commands:
   viewrecipe:
     description: View recipes registered with SelimCore and most vanilla recipes.
@@ -9,3 +9,6 @@ commands:
   pluginversion:
     description: Gets the installed version of the given plugin.
     usage: /pluginversion <pluginName>
+  setupscoreboard:
+    description: Sets up a display scoreboard for supported plugins.
+    usage /setupscoreboard <scoreboardID> <x> <y> <z> <face> <place> [includeHead]

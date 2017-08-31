@@ -1,20 +1,18 @@
 package selim.core.leaderboards;
 
-import java.io.Serializable;
-
 import org.bukkit.entity.Player;
 
-public class Score<T extends Comparable<T> & Serializable> implements Comparable<T> {
+public class Score {
 
-	private final ScoreTracker<T> tracker;
+	private final ScoreTracker tracker;
 	private final Player player;
-	private T data;
+	private int data;
 
-	protected Score(ScoreTracker<T> tracker, Player player) {
-		this(tracker, player, null);
+	protected Score(ScoreTracker tracker, Player player) {
+		this(tracker, player, 0);
 	}
 
-	protected Score(ScoreTracker<T> tracker, Player player, T data) {
+	protected Score(ScoreTracker tracker, Player player, int data) {
 		this.tracker = tracker;
 		this.player = player;
 		this.data = data;
@@ -24,19 +22,14 @@ public class Score<T extends Comparable<T> & Serializable> implements Comparable
 		return this.player;
 	}
 
-	public T updateScore(T data) {
+	public int updateScore(int data) {
 		this.data = data;
 		tracker.sort();
 		return data;
 	}
 
-	public T getScore() {
+	public int getScore() {
 		return this.data;
-	}
-
-	@Override
-	public int compareTo(T o) {
-		return data.compareTo(o);
 	}
 
 }

@@ -12,6 +12,8 @@ import org.bukkit.plugin.PluginManager;
 
 import selim.core.commands.CommandPluginVersion;
 import selim.core.commands.CommandPluginVersion.TabCompleterPluginVersion;
+import selim.core.commands.CommandSetupScoreboard;
+import selim.core.commands.CommandSetupScoreboard.TabCompleterSetupScoreboard;
 import selim.core.commands.CommandViewRecipe;
 import selim.core.commands.CommandViewRecipe.TabCompleterViewRecipe;
 import selim.core.events.GameTickEvent;
@@ -79,6 +81,8 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		this.getCommand("viewrecipe").setTabCompleter(new TabCompleterViewRecipe());
 		this.getCommand("pluginversion").setExecutor(new CommandPluginVersion());
 		this.getCommand("pluginversion").setTabCompleter(new TabCompleterPluginVersion());
+		this.getCommand("setupscoreboard").setExecutor(new CommandSetupScoreboard());
+		this.getCommand("setupscoreboard").setTabCompleter(new TabCompleterSetupScoreboard());
 		RecipeUtils.initRecipes();
 
 		// MANAGER.registerEvents(new MachineEventListener(), this);
