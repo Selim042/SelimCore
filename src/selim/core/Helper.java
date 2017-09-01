@@ -3,11 +3,13 @@ package selim.core;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -22,6 +24,12 @@ import com.comphenix.packetwrapper.WrapperPlayServerChat;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 public class Helper {
+
+	public static BlockFace getPlayerFacing(Player player) {
+		List<Block> lastBlocks = player.getLastTwoTargetBlocks((Set<Material>) null, 100);
+		BlockFace face = lastBlocks.get(1).getFace(lastBlocks.get(0));
+		return face;
+	}
 
 	public static void sendActionbar(Player player, String message) {
 		WrapperPlayServerChat packet = new WrapperPlayServerChat();

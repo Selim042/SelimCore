@@ -125,6 +125,13 @@ public class ScoreTracker {
 		return tracker;
 	}
 
+	public static List<String> getTrackerIDs() {
+		List<String> ids = new LinkedList<String>();
+		for (ScoreTracker st : TRACKERS)
+			ids.add(st.id);
+		return ids;
+	}
+
 	public static void loadTrackers() {
 		for (File file : TRACKERS_FOLDER.listFiles(new FilenameFilter() {
 
