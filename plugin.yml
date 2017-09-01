@@ -11,4 +11,4 @@ commands:
     usage: /pluginversion <pluginName>
   setupscoreboard:
     description: Sets up a display scoreboard for supported plugins.
-    usage /setupscoreboard <scoreboardID> <x> <y> <z> <face> <place> [includeHead]
+    usage: /setupscoreboard <scoreboardID> <x> <y> <z> <face> <place>

@@ -1,41 +1,123 @@
 package selim.core.leaderboards;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import selim.core.Helper;
+import selim.core.SelimCore;
 import selim.core.events.GameTickEvent;
 
 public class ScoreboardManager implements Listener {
 
+	private static final File BOARDS_FOLDER;
 	private static final List<Scoreboard> BOARDS = new LinkedList<Scoreboard>();
+
+	static {
+		File temp = SelimCore.getPlugin(SelimCore.class).getDataFolder();
+		if (!temp.exists())
+			temp.mkdirs();
+		temp = new File(temp.getAbsolutePath() + File.separator + "boards");
+		if (!temp.exists())
+			temp.mkdirs();
+		BOARDS_FOLDER = temp;
+	}
 
 	@EventHandler
 	public void updateScoreBoards(GameTickEvent event) {
 		for (Scoreboard sb : BOARDS) {
 			Block block = sb.getLocation().getBlock();
-			BlockState state = block.getState();
-			if (state instanceof Sign) {
-				Sign sign = (Sign) state;
+			if (block.getType() == Material.WALL_SIGN) {
 				ScoreTracker st = ScoreTracker.getTracker(sb.getTrackerID());
-				if (st == null || !st.hasUpdated())
-					return;
-				int place = sb.getPlace();
-				Score score = st.getPlace(place);
-				sign.setLine(0,
-						ChatColor.GOLD + "[ " + ChatColor.RESET + st.getName() + ChatColor.GOLD + " ]");
-				sign.setLine(1, score + " place");
-				sign.setLine(2, score.getPlayer().getDisplayName());
-				sign.setLine(3, score.toString());
+				if (st != null && st.hasUpdated())
+					sb.update();
 			} else {
 				BOARDS.remove(sb);
 			}
+		}
+		for (Scoreboard sb : BOARDS) {
+			ScoreTracker ts = ScoreTracker.getTracker(sb.getTrackerID());
+			if (ts != null)
+				ts.setUpdated(false);
+		}
+	}
+
+	public static void addScoreboard(Scoreboard board) {
+		for (Scoreboard b : BOARDS) {
+			if (b.getLocation().equals(board.getLocation()))
+				BOARDS.remove(b);
+		}
+		BOARDS.add(board);
+	}
+
+	public static void loadScoreboards() {
+		for (File file : BOARDS_FOLDER.listFiles(new FilenameFilter() {
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".board");
+			}
+		})) {
+			if (file == null || !file.exists() || file.isDirectory()) {} else {
+				try {
+					BufferedReader stream = new BufferedReader(new FileReader(file));
+					// String line = stream.readLine();
+					String name = file.getName().replaceAll("\\.board", "");
+					Location location = Helper.locationFromString(name);
+					BlockFace facing = BlockFace.valueOf(stream.readLine());
+					String id = stream.readLine();
+					int place = Integer.valueOf(stream.readLine());
+					Scoreboard board = new Scoreboard(location, facing, id, place);
+					BOARDS.add(board);
+					stream.close();
+				} catch (IOException e) {}
+			}
+		}
+	}
+
+	public static void saveScoreboards() {
+		for (Scoreboard board : BOARDS) {
+			File file = new File(BOARDS_FOLDER.getAbsolutePath() + File.separator
+					+ Helper.locationToString(board.getLocation()) + ".board");
+			if (file == null || !file.exists() || file.isDirectory() || board == null) {
+				try {
+					file.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// return;
+			} else {
+				try {
+					FileOutputStream stream = new FileOutputStream(file);
+					writeString(stream, board.getFacing().name() + '\n');
+					writeString(stream, board.getTrackerID() + '\n');
+					writeString(stream, Integer.toString(board.getPlace()));
+					stream.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+
+	private static void writeString(FileOutputStream stream, String string) {
+		byte[] bytes = string.getBytes();
+		try {
+			stream.write(bytes);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

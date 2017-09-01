@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +35,11 @@ public class ScoreTracker {
 		TRACKERS_FOLDER = temp;
 	}
 
-	public ScoreTracker(String id, String name) {
+	private ScoreTracker(String id) {
+		this(id, null);
+	}
+
+	private ScoreTracker(String id, String name) {
 		this.id = id;
 		this.name = name;
 	}
@@ -70,7 +74,7 @@ public class ScoreTracker {
 
 	public Score getScore(Player player) {
 		for (Score s : SCORES)
-			if (s.getPlayer().equals(player))
+			if (s.getPlayer() != null && s.getPlayer().getUniqueId().equals(player.getUniqueId()))
 				return s;
 		Score score = new Score(this, player);
 		SCORES.add(score);
@@ -80,9 +84,9 @@ public class ScoreTracker {
 
 	public Score setScore(Player player, int data) {
 		for (Score s : SCORES) {
-			if (s.getPlayer().equals(player)) {
+			if (s.getPlayer() != null && s.getPlayer().equals(player)) {
 				s.updateScore(data);
-				this.sort();
+				// this.sort();
 				return s;
 			}
 		}
@@ -112,41 +116,63 @@ public class ScoreTracker {
 		return null;
 	}
 
-	public static ScoreTracker loadTracker(String id) {
-		File file = new File(TRACKERS_FOLDER.getAbsolutePath() + File.separator + id);
-		if (file == null || !file.exists() || file.isDirectory())
-			return null;
-		try {
-			BufferedReader stream = new BufferedReader(new FileReader(file));
-			String line = stream.readLine();
-			ScoreTracker tracker = new ScoreTracker(id, line);
-			line = stream.readLine();
-			while (line != null && !line.equals("")) {
-				tracker.setScore(Bukkit.getPlayer(UUID.fromString(line.substring(0, line.indexOf(':')))),
-						Integer.valueOf(line.substring(line.indexOf(':' + 1))));
-				line = stream.readLine();
-			}
-			stream.close();
-			return tracker;
-		} catch (IOException e) {}
-		return null;
+	public static ScoreTracker getTracker(String id, String name) {
+		for (ScoreTracker st : TRACKERS)
+			if (st.id.equals(id))
+				return st;
+		ScoreTracker tracker = new ScoreTracker(id, name);
+		TRACKERS.add(tracker);
+		return tracker;
 	}
 
-	public static void saveTracker(String id) {
-		File file = new File(TRACKERS_FOLDER.getAbsolutePath() + File.separator + id);
-		if (file == null || !file.exists() || file.isDirectory() || getTracker(id) == null)
-			return;
-		try {
-			FileOutputStream stream = new FileOutputStream(file);
-			ScoreTracker tracker = getTracker(id);
-			writeString(stream, getTracker(id).name + '\n');
-			for (Score s : tracker.SCORES) {
-				writeString(stream, s.getPlayer().getUniqueId() + ":");;
-				ObjectOutputStream oos = new ObjectOutputStream(stream);
-				oos.writeObject(s.getScore());
+	public static void loadTrackers() {
+		for (File file : TRACKERS_FOLDER.listFiles(new FilenameFilter() {
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".tracker");
 			}
-			stream.close();
-		} catch (IOException e) {}
+		})) {
+			if (file == null || !file.exists() || file.isDirectory()) {} else {
+				try {
+					BufferedReader stream = new BufferedReader(new FileReader(file));
+					String line = stream.readLine();
+					String name = file.getName().replaceAll("\\.tracker", "");
+					ScoreTracker tracker = new ScoreTracker(name, line);
+					line = stream.readLine();
+					while (line != null && !line.equals("")) {
+						tracker.setScore(
+								Bukkit.getPlayer(UUID.fromString(line.substring(0, line.indexOf(':')))),
+								Integer.valueOf(line.substring(line.indexOf(':') + 1)));
+						line = stream.readLine();
+					}
+					TRACKERS.add(tracker);
+					stream.close();
+				} catch (IOException e) {}
+			}
+		}
+	}
+
+	public static void saveTrackers() {
+		for (ScoreTracker tracker : TRACKERS) {
+			File file = new File(
+					TRACKERS_FOLDER.getAbsolutePath() + File.separator + tracker.id + ".tracker");
+			if (file == null || !file.exists() || file.isDirectory() || tracker == null) {
+				try {
+					file.createNewFile();
+				} catch (IOException e) {}
+			} else {
+				try {
+					FileOutputStream stream = new FileOutputStream(file);
+					writeString(stream, tracker.name + '\n');
+					for (Score s : tracker.SCORES) {
+						writeString(stream, s.getPlayer().getUniqueId() + ":"
+								+ Integer.toString(s.getScore()) + '\n');
+					}
+					stream.close();
+				} catch (IOException e) {}
+			}
+		}
 	}
 
 	private static void writeString(FileOutputStream stream, String string) {

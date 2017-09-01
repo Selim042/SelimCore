@@ -1,6 +1,8 @@
 package selim.core;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -9,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.scheduler.BukkitTask;
 
 import selim.core.commands.CommandPluginVersion;
 import selim.core.commands.CommandPluginVersion.TabCompleterPluginVersion;
@@ -18,6 +21,7 @@ import selim.core.commands.CommandViewRecipe;
 import selim.core.commands.CommandViewRecipe.TabCompleterViewRecipe;
 import selim.core.events.GameTickEvent;
 import selim.core.events.PluginsLoadedEvent;
+import selim.core.leaderboards.ScoreTracker;
 import selim.core.leaderboards.ScoreboardManager;
 import selim.core.util.RecipeUtils;
 import selim.core.util.SemanticVersion;
@@ -34,6 +38,8 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 	protected static PluginManager MANAGER;
 	protected static SelimCore INSTANCE;
 	protected static Logger LOGGER;
+
+	private static final LinkedList<BukkitTask> TASKS_TO_KILL = new LinkedList<BukkitTask>();
 	// protected static MachineRegistry MACHINE_REGISTRY = new
 	// MachineRegistry();
 
@@ -84,17 +90,29 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		this.getCommand("setupscoreboard").setExecutor(new CommandSetupScoreboard());
 		this.getCommand("setupscoreboard").setTabCompleter(new TabCompleterSetupScoreboard());
 		RecipeUtils.initRecipes();
+		ScoreTracker.loadTrackers();
+		ScoreboardManager.loadScoreboards();
 
 		// MANAGER.registerEvents(new MachineEventListener(), this);
 		registerGameTickEvent();
 
-		Bukkit.getScheduler().runTask(this, new Runnable() {
+		TASKS_TO_KILL.add(Bukkit.getScheduler().runTask(this, new Runnable() {
 
 			@Override
 			public void run() {
 				SelimCore.MANAGER.callEvent(new PluginsLoadedEvent());
 			}
-		});
+		}));
+
+		TASKS_TO_KILL.add(Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+
+			@Override
+			public void run() {
+				ScoreTracker.saveTrackers();
+				ScoreboardManager.saveScoreboards();
+			}
+		}, 1000, 1000));
+		// }, 6000, 6000));
 
 		try {
 			Metrics metrics = new Metrics(this);
@@ -120,13 +138,13 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 	private GameTickEvent gametickevent = new GameTickEvent();
 
 	private void registerGameTickEvent() {
-		Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+		TASKS_TO_KILL.add(Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
 
 			@Override
 			public void run() {
 				Bukkit.getPluginManager().callEvent(gametickevent);
 			}
-		}, 1, 1);
+		}, 1, 1));
 	}
 
 	@Override
@@ -140,6 +158,11 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		LOGGER = null;
 		MANAGER = null;
 		HandlerList.unregisterAll(this);
+		ScoreTracker.saveTrackers();
+		ScoreboardManager.saveScoreboards();
+
+		for (BukkitTask task : TASKS_TO_KILL)
+			task.cancel();
 	}
 
 	@Override
@@ -156,9 +179,12 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 	}
 
 	public static void debug(String str) {
-		for (Player p : SelimCore.INSTANCE.getServer().getOnlinePlayers())
-			if (p.isOp())
-				p.sendMessage(str);
+		if (INSTANCE != null)
+			for (Player p : INSTANCE.getServer().getOnlinePlayers())
+				if (p.isOp())
+					p.sendMessage(str);
+		if (LOGGER != null)
+			LOGGER.log(Level.INFO, "DEBUG: " + str);
 	}
 
 	public static void debug(boolean bool) {

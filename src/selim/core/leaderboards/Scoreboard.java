@@ -17,68 +17,62 @@ public class Scoreboard {
 	private final BlockFace facing;
 	private final String id;
 	private final int place;
-	private final boolean withHead;
 
 	public Scoreboard(Location loc, BlockFace facing, String trackerId, int place) {
-		this(loc, facing, trackerId, place, false);
-	}
-
-	public Scoreboard(Location loc, BlockFace facing, String trackerId, int place, boolean withHead) {
 		this.loc = loc;
 		this.facing = facing;
 		this.id = trackerId;
 		this.place = place;
-		this.withHead = withHead;
-	}
-
-	public int getPlace() {
-		return this.place;
-	}
-
-	public String getTrackerID() {
-		return this.id;
 	}
 
 	public Location getLocation() {
 		return this.loc;
 	}
 
-	@SuppressWarnings("deprecation")
+	public BlockFace getFacing() {
+		return this.facing;
+	}
+
+	public String getTrackerID() {
+		return this.id;
+	}
+
+	public int getPlace() {
+		return this.place;
+	}
+
 	public void update() {
 		ScoreTracker tracker = ScoreTracker.getTracker(this.id);
 		Score score = tracker.getPlace(this.place);
-		Player player = score.getPlayer();
+		Player player = null;
+		if (score != null)
+			player = score.getPlayer();
 		Block signBlock = loc.getBlock();
-		signBlock.setType(Material.WALL_SIGN);
-		Sign sign = (Sign) signBlock.getState();
-		signBlock.setData(getSignFacingByte());
-		sign.setLine(0, "[" + tracker.getName() + "]");
-		sign.setLine(1, getPlaceString());
-		sign.setLine(2, player.getDisplayName());
-		sign.setLine(3, player.getDisplayName());
-		if (withHead) {
-			Location skullLoc = Helper.offsetLocation(this.loc, this.facing.getOppositeFace());
+		if (signBlock.getType() == Material.WALL_SIGN) {
+			Sign sign = (Sign) signBlock.getState();
+			sign.setLine(0, "[" + tracker.getName() + "]");
+			sign.setLine(1, getPlaceString());
+			if (player != null) {
+				sign.setLine(2, player.getDisplayName());
+				sign.setLine(3, getScoreString());
+			} else {
+				sign.setLine(2, "");
+				sign.setLine(3, "");
+			}
+			sign.update(true);
+			Location skullLoc = Helper.offsetLocation(this.loc.clone().add(0, 1, 0),
+					this.facing.getOppositeFace());
 			Block skullBlock = skullLoc.getBlock();
-			skullBlock.setType(Material.SKULL);
-			Skull skull = (Skull) skullBlock.getState();
-			skull.setSkullType(SkullType.PLAYER);
-			skull.setOwningPlayer(player);
-			skull.setRotation(this.facing);
-		}
-	}
-
-	private byte getSignFacingByte() {
-		switch (this.facing) {
-		case EAST:
-			return 5;
-		case NORTH:
-			return 2;
-		case SOUTH:
-			return 3;
-		case WEST:
-			return 4;
-		default:
-			return 0;
+			if (skullBlock.getType() == Material.SKULL) {
+				Skull skull = (Skull) skullBlock.getState();
+				if (player == null) {
+					skull.setSkullType(SkullType.SKELETON);
+				} else {
+					skull.setSkullType(SkullType.PLAYER);
+					skull.setOwningPlayer(player);
+				}
+				skull.update(true);
+			}
 		}
 	}
 
@@ -100,6 +94,19 @@ public class Scoreboard {
 		}
 		placeString += " Place";
 		return placeString;
+	}
+
+	private String getScoreString() {
+		String scoreString = "";
+		ScoreTracker tracker = ScoreTracker.getTracker(this.id);
+		Score score = tracker.getPlace(this.place);
+		String scoreS = Integer.toString(score.getScore());
+		for (int i = 0; i < scoreS.length(); i++) {
+			if ((i + 1) % 4 == 0)
+				scoreString += ',';
+			scoreString += scoreS.charAt(i);
+		}
+		return scoreString;
 	}
 
 }
