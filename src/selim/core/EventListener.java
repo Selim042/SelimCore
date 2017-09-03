@@ -48,7 +48,7 @@ public class EventListener implements Listener {
 					if (pluginReqVersion.compareTo(coreVersion) != -1) {
 						SelimCore.LOGGER.log(Level.SEVERE,
 								"Disabled " + sp.getName() + ", requires at least SelimCore version "
-										+ sp.getMinimumCoreVersion() + ", " + coreVersion
+										+ pluginReqVersion + ", " + coreVersion
 										+ " is supplied.");
 						SelimCore.MANAGER.disablePlugin(sp);
 						disabledPlugins.add(sp);
