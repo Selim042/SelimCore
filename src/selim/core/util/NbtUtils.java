@@ -2,10 +2,13 @@ package selim.core.util;
 
 import java.util.List;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.material.MaterialData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
@@ -69,6 +72,46 @@ public class NbtUtils {
 		ItemStack sell = recipe.getResult();
 		recipeNbt.put("sell", nbtFromStack(sell));
 		return recipeNbt;
+	}
+
+	public static NbtCompound nbtFromEffect(PotionEffect effect) {
+		NbtCompound effectNbt = NbtFactory.ofCompound("");
+		effectNbt.put("effect", StringIDHelper.getIDForPotion(effect.getType()));
+		effectNbt.put("duration", effect.getDuration());
+		effectNbt.put("amplifier", effect.getAmplifier());
+		effectNbt.put("ambient", effect.isAmbient() ? (byte) 1 : (byte) 0);
+		effectNbt.put("particles", effect.hasParticles() ? (byte) 1 : (byte) 0);
+		Color color = effect.getColor();
+		if (color != null) {
+			NbtCompound colorNbt = NbtFactory.ofCompound("");
+			colorNbt.put("red", color.getRed());
+			colorNbt.put("green", color.getGreen());
+			colorNbt.put("blue", color.getBlue());
+			effectNbt.put("color", colorNbt);
+		}
+		return effectNbt;
+	}
+
+	public static PotionEffect effectFromNbt(NbtCompound nbt) {
+		if (!nbt.containsKey("effect") || !nbt.containsKey("duration") || !nbt.containsKey("amplifier"))
+			return null;
+		PotionEffectType effect = StringIDHelper.getPotionForID(nbt.getString("effect"));
+		int duration = nbt.getInteger("duration");
+		int amplifier = nbt.getInteger("amplifier");
+		boolean ambient = false;
+		boolean particles = true;
+		if (nbt.containsKey("ambient"))
+			ambient = nbt.getByte("ambient") == (byte) 1 ? true : false;
+		if (nbt.containsKey("particles"))
+			particles = nbt.getByte("particles") == (byte) 1 ? true : false;
+		if (!nbt.containsKey("color"))
+			return new PotionEffect(effect, duration, amplifier, ambient, particles);
+		NbtCompound colorNbt = nbt.getCompound("color");
+		int red = colorNbt.getInteger("red");
+		int green = colorNbt.getInteger("green");
+		int blue = colorNbt.getInteger("blue");
+		return new PotionEffect(effect, duration, amplifier, ambient, particles,
+				Color.fromRGB(red, green, blue));
 	}
 
 	public static NbtType getKeyType(final NbtCompound nbt, final String key) {

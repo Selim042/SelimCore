@@ -5,11 +5,13 @@ import java.util.Map.Entry;
 
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
+import org.bukkit.potion.PotionEffectType;
 
 public class StringIDHelper {
 
 	private static HashMap<Material, String> MATERIAL_IDS = new HashMap<Material, String>();
 	private static HashMap<EntityType, String> ENTITY_IDS = new HashMap<EntityType, String>();
+	private static HashMap<PotionEffectType, String> POTION_IDS = new HashMap<PotionEffectType, String>();
 
 	static {
 		for (Material mat : Material.values()) {
@@ -1625,6 +1627,36 @@ public class StringIDHelper {
 		}
 	}
 
+	static {
+		POTION_IDS.put(PotionEffectType.ABSORPTION, "minecraft:absorption");
+		POTION_IDS.put(PotionEffectType.UNLUCK, "minecraft:unluck");
+		POTION_IDS.put(PotionEffectType.BLINDNESS, "minecraft:blindness");
+		POTION_IDS.put(PotionEffectType.FIRE_RESISTANCE, "minecraft:fire_resistance");
+		POTION_IDS.put(PotionEffectType.GLOWING, "minecraft:glowing");
+		POTION_IDS.put(PotionEffectType.FAST_DIGGING, "minecraft:haste");
+		POTION_IDS.put(PotionEffectType.HEALTH_BOOST, "minecraft:health_boost");
+		POTION_IDS.put(PotionEffectType.HUNGER, "minecraft:hunger");
+		POTION_IDS.put(PotionEffectType.HARM, "minecraft:instant_damage");
+		POTION_IDS.put(PotionEffectType.HEAL, "minecraft:instant_health");
+		POTION_IDS.put(PotionEffectType.INVISIBILITY, "minecraft:invisibility");
+		POTION_IDS.put(PotionEffectType.JUMP, "minecraft:jump_boost");
+		POTION_IDS.put(PotionEffectType.LEVITATION, "minecraft:levitation");
+		POTION_IDS.put(PotionEffectType.LUCK, "minecraft:luck");
+		POTION_IDS.put(PotionEffectType.SLOW_DIGGING, "minecraft:mining_fatigue");
+		POTION_IDS.put(PotionEffectType.CONFUSION, "minecraft:nausea");
+		POTION_IDS.put(PotionEffectType.NIGHT_VISION, "minecraft:night_vision");
+		POTION_IDS.put(PotionEffectType.POISON, "minecraft:poison");
+		POTION_IDS.put(PotionEffectType.REGENERATION, "minecraft:regeneration");
+		POTION_IDS.put(PotionEffectType.DAMAGE_RESISTANCE, "minecraft:resistance");
+		POTION_IDS.put(PotionEffectType.SATURATION, "minecraft:saturation");
+		POTION_IDS.put(PotionEffectType.SLOW, "minecraft:slowness");
+		POTION_IDS.put(PotionEffectType.SPEED, "minecraft:speed");
+		POTION_IDS.put(PotionEffectType.INCREASE_DAMAGE, "minecraft:strength");
+		POTION_IDS.put(PotionEffectType.WATER_BREATHING, "minecraft:water_breathing");
+		POTION_IDS.put(PotionEffectType.WEAKNESS, "minecraft:weakness");
+		POTION_IDS.put(PotionEffectType.WITHER, "minecraft:wither");
+	}
+
 	public static String getIDForMat(Material mat) {
 		return MATERIAL_IDS.get(mat);
 	}
@@ -1642,6 +1674,17 @@ public class StringIDHelper {
 
 	public static EntityType getEntityForID(String id) {
 		for (Entry<EntityType, String> s : ENTITY_IDS.entrySet())
+			if (s.getValue().equals(id))
+				return s.getKey();
+		return null;
+	}
+
+	public static String getIDForPotion(PotionEffectType entity) {
+		return POTION_IDS.get(entity);
+	}
+
+	public static PotionEffectType getPotionForID(String id) {
+		for (Entry<PotionEffectType, String> s : POTION_IDS.entrySet())
 			if (s.getValue().equals(id))
 				return s.getKey();
 		return null;
