@@ -1,4 +1,6 @@
 spigot-*.jar
 .classpath
 .project
+.settings/
+bin/
 target/
