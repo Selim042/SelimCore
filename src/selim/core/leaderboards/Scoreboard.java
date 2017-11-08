@@ -50,15 +50,13 @@ public class Scoreboard {
 		Block signBlock = loc.getBlock();
 		if (signBlock.getType() == Material.WALL_SIGN) {
 			Sign sign = (Sign) signBlock.getState();
-			sign.setLine(0, "[" + tracker.getName() + "]");
-			sign.setLine(1, getPlaceString());
-			if (player != null) {
-				sign.setLine(2, player.getDisplayName());
-				sign.setLine(3, getScoreString());
-			} else {
-				sign.setLine(2, "");
-				sign.setLine(3, "");
-			}
+			SignFormat format = tracker.getFormat();
+			String pluginName = tracker.getPluginName();
+			String[] extras = tracker.getExtras();
+			sign.setLine(0, "[" + tracker.getPluginName() + "]");
+			sign.setLine(1, format.formatLine2(score, place, pluginName, extras));
+			sign.setLine(2, format.formatLine3(score, place, pluginName, extras));
+			sign.setLine(3, format.formatLine4(score, place, pluginName, extras));
 			sign.update(true);
 			Location skullLoc = Helper.offsetLocation(this.loc.clone().add(0, 1, 0),
 					this.facing.getOppositeFace());
@@ -74,39 +72,6 @@ public class Scoreboard {
 				skull.update(true);
 			}
 		}
-	}
-
-	private String getPlaceString() {
-		String placeString = Integer.toString(this.place);
-		switch (this.place) {
-		case 1:
-			placeString += "st";
-			break;
-		case 2:
-			placeString += "nd";
-			break;
-		case 3:
-			placeString += "rd";
-			break;
-		default:
-			placeString += "th";
-			break;
-		}
-		placeString += " Place";
-		return placeString;
-	}
-
-	private String getScoreString() {
-		String scoreString = "";
-		ScoreTracker tracker = ScoreTracker.getTracker(this.id);
-		Score score = tracker.getPlace(this.place);
-		String scoreS = Integer.toString(score.getScore());
-		for (int i = 0; i < scoreS.length(); i++) {
-			if ((i + 1) % 4 == 0)
-				scoreString += ',';
-			scoreString += scoreS.charAt(i);
-		}
-		return scoreString;
 	}
 
 }

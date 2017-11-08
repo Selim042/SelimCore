@@ -1,4 +1,4 @@
-package selim.machines;
+package selim.core.machines;
 
 public interface ITickable {
 

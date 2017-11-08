@@ -93,7 +93,8 @@ public class ScoreboardManager implements Listener {
 					+ Helper.locationToString(board.getLocation()) + ".board");
 			if (file == null || !file.exists() || file.isDirectory() || board == null) {
 				try {
-					file.createNewFile();
+					if (file != null)
+						file.createNewFile();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -106,8 +107,7 @@ public class ScoreboardManager implements Listener {
 					writeString(stream, board.getTrackerID() + '\n');
 					writeString(stream, Integer.toString(board.getPlace()));
 					stream.close();
-				} catch (IOException e) {
-				}
+				} catch (IOException e) {}
 			}
 		}
 	}

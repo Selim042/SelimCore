@@ -1,4 +1,4 @@
-package selim.machines;
+package selim.core.machines;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 

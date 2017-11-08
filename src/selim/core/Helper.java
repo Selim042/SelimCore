@@ -25,6 +25,21 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 public class Helper {
 
+	public static String getPsuedoNickname(String name) {
+		if (name.matches("[a-z]*"))
+			return name;
+		name = name.replaceFirst("_*", "").replaceFirst("\\d*", "");
+		String nick = "" + name.charAt(0);
+		for (int i = 1; i < name.length(); i++) {
+			char c = name.charAt(i);
+			if (Character.isLowerCase(c) && c != '_' && !Character.isDigit(c))
+				nick += c;
+			else
+				return nick.length() <= 1 || nick.equalsIgnoreCase("The") ? name : nick;
+		}
+		return name;
+	}
+
 	public static BlockFace getPlayerFacing(Player player) {
 		List<Block> lastBlocks = player.getLastTwoTargetBlocks((Set<Material>) null, 100);
 		BlockFace face = lastBlocks.get(1).getFace(lastBlocks.get(0));

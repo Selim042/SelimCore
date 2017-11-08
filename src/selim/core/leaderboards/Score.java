@@ -1,11 +1,14 @@
 package selim.core.leaderboards;
 
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class Score implements Comparable<Score> {
 
 	private final ScoreTracker tracker;
-	private final Player player;
+	private final UUID playerUUID;
 	private int score;
 
 	protected Score(ScoreTracker tracker, Player player) {
@@ -13,13 +16,25 @@ public class Score implements Comparable<Score> {
 	}
 
 	protected Score(ScoreTracker tracker, Player player, int data) {
+		this(tracker, player == null ? null : player.getUniqueId(), data);
+	}
+
+	protected Score(ScoreTracker tracker, UUID playerUUID) {
+		this(tracker, playerUUID, 0);
+	}
+
+	protected Score(ScoreTracker tracker, UUID playerUUID, int data) {
 		this.tracker = tracker;
-		this.player = player;
+		this.playerUUID = playerUUID;
 		this.score = data;
 	}
 
+	public UUID getUUID() {
+		return this.playerUUID;
+	}
+
 	public Player getPlayer() {
-		return this.player;
+		return Bukkit.getPlayer(this.playerUUID);
 	}
 
 	public int updateScore(int data) {
@@ -41,8 +56,7 @@ public class Score implements Comparable<Score> {
 
 	@Override
 	public String toString() {
-		return this.player == null ? "NO PLAYER:" + this.score
-				: this.player.getDisplayName() + ":" + this.score;
+		return this.playerUUID == null ? "NO PLAYER:" + this.score : this.playerUUID + ":" + this.score;
 	}
 
 }

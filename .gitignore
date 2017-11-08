@@ -1,3 +1,4 @@
 spigot-*.jar
 .classpath
 .project
+target/

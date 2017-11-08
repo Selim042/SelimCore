@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import selim.core.SelimCore;
@@ -22,7 +21,9 @@ public class ScoreTracker {
 
 	private final List<Score> SCORES = new LinkedList<Score>();
 	private final String id;
-	private final String name;
+	private final String pluginName;
+	private final SignFormat format;
+	private final String[] extras;
 	private boolean updated = false;
 
 	static {
@@ -36,12 +37,18 @@ public class ScoreTracker {
 	}
 
 	private ScoreTracker(String id) {
-		this(id, null);
+		this(id, null, null);
 	}
 
-	private ScoreTracker(String id, String name) {
+	private ScoreTracker(String id, SignFormat format) {
+		this(id, null, format);
+	}
+
+	private ScoreTracker(String id, String pluginName, SignFormat format, String... extras) {
 		this.id = id;
-		this.name = name;
+		this.pluginName = pluginName;
+		this.format = format;
+		this.extras = extras;
 	}
 
 	public Score getPlace(int place) {
@@ -55,8 +62,16 @@ public class ScoreTracker {
 		return this.id;
 	}
 
-	public String getName() {
-		return this.name;
+	public String getPluginName() {
+		return this.pluginName;
+	}
+
+	public SignFormat getFormat() {
+		return this.format;
+	}
+
+	public String[] getExtras() {
+		return this.extras;
 	}
 
 	public void sort() {
@@ -83,14 +98,18 @@ public class ScoreTracker {
 	}
 
 	public Score setScore(Player player, int data) {
+		return setScore(player.getUniqueId(), data);
+	}
+
+	public Score setScore(UUID uuid, int data) {
 		for (Score s : SCORES) {
-			if (s.getPlayer() != null && s.getPlayer().equals(player)) {
+			if (s.getUUID() != null && s.getUUID().equals(uuid)) {
 				s.updateScore(data);
 				// this.sort();
 				return s;
 			}
 		}
-		Score score = new Score(this, player, data);
+		Score score = new Score(this, uuid, data);
 		SCORES.add(score);
 		this.sort();
 		return score;
@@ -116,11 +135,12 @@ public class ScoreTracker {
 		return null;
 	}
 
-	public static ScoreTracker getTracker(String id, String name) {
+	public static ScoreTracker getTracker(String id, String pluginName, SignFormat format,
+			String... extras) {
 		for (ScoreTracker st : TRACKERS)
 			if (st.id.equals(id))
 				return st;
-		ScoreTracker tracker = new ScoreTracker(id, name);
+		ScoreTracker tracker = new ScoreTracker(id, pluginName, format, extras);
 		TRACKERS.add(tracker);
 		return tracker;
 	}
@@ -143,13 +163,21 @@ public class ScoreTracker {
 			if (file == null || !file.exists() || file.isDirectory()) {} else {
 				try {
 					BufferedReader stream = new BufferedReader(new FileReader(file));
-					String line = stream.readLine();
 					String name = file.getName().replaceAll("\\.tracker", "");
-					ScoreTracker tracker = new ScoreTracker(name, line);
-					line = stream.readLine();
+					String pluginName = stream.readLine();
+//					String form1 = stream.readLine();
+					String form2 = stream.readLine();
+					String form3 = stream.readLine();
+					String form4 = stream.readLine();
+					int numExtras = Integer.valueOf(stream.readLine());
+					String[] extras = new String[numExtras];
+					for (int i = 0; i < numExtras; i++)
+						extras[i] = stream.readLine();
+					String line = stream.readLine();
+					ScoreTracker tracker = new ScoreTracker(name, pluginName,
+							new SignFormat(/*form1, */form2, form3, form4), extras);
 					while (line != null && !line.equals("")) {
-						tracker.setScore(
-								Bukkit.getPlayer(UUID.fromString(line.substring(0, line.indexOf(':')))),
+						tracker.setScore(UUID.fromString(line.substring(0, line.indexOf(':'))),
 								Integer.valueOf(line.substring(line.indexOf(':') + 1)));
 						line = stream.readLine();
 					}
@@ -166,16 +194,24 @@ public class ScoreTracker {
 					TRACKERS_FOLDER.getAbsolutePath() + File.separator + tracker.id + ".tracker");
 			if (file == null || !file.exists() || file.isDirectory() || tracker == null) {
 				try {
-					file.createNewFile();
+					if (file != null)
+						file.createNewFile();
 				} catch (IOException e) {}
 			} else {
 				try {
 					FileOutputStream stream = new FileOutputStream(file);
-					writeString(stream, tracker.name + '\n');
-					for (Score s : tracker.SCORES) {
-						writeString(stream, s.getPlayer().getUniqueId() + ":"
-								+ Integer.toString(s.getScore()) + '\n');
-					}
+					writeString(stream, tracker.pluginName + '\n');
+//					writeString(stream, tracker.format.getLine1Format() + '\n');
+					writeString(stream, tracker.format.getLine2Format() + '\n');
+					writeString(stream, tracker.format.getLine3Format() + '\n');
+					writeString(stream, tracker.format.getLine4Format() + '\n');
+					writeString(stream, Integer.toString(tracker.extras.length) + '\n');
+					for (int i = 0; i < tracker.extras.length; i++)
+						writeString(stream, tracker.extras[i] + '\n');
+					for (Score s : tracker.SCORES)
+						if (s.getUUID() != null)
+							writeString(stream,
+									s.getUUID() + ":" + Integer.toString(s.getScore()) + '\n');
 					stream.close();
 				} catch (IOException e) {}
 			}

@@ -1,4 +1,4 @@
-package selim.machines;
+package selim.core.machines;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package selim.machines;
+package selim.core.machines;
 
 import java.io.IOException;
 
@@ -19,7 +19,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 import selim.core.events.GameTickEvent;
 import selim.core.events.PluginsLoadedEvent;
-import selim.machines.test.MachineFurnace;
+import selim.core.machines.test.MachineFurnace;
 
 public class MachineEventListener implements Listener {
 

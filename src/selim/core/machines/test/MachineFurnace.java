@@ -1,4 +1,4 @@
-package selim.machines.test;
+package selim.core.machines.test;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -14,13 +14,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 
 import selim.core.Helper;
+import selim.core.machines.EnergyMachine;
+import selim.core.machines.IEnergyStorage;
+import selim.core.machines.IMachineGui;
+import selim.core.machines.ITickable;
+import selim.core.machines.Machine;
+import selim.core.machines.MachineHelper;
 import selim.core.util.NbtUtils;
-import selim.machines.EnergyMachine;
-import selim.machines.IEnergyStorage;
-import selim.machines.IMachineGui;
-import selim.machines.ITickable;
-import selim.machines.Machine;
-import selim.machines.MachineHelper;
 
 public class MachineFurnace extends EnergyMachine implements IMachineGui, ITickable {
 

@@ -6,12 +6,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitTask;
+import org.sqlite.SQLite;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 
 import selim.core.commands.CommandPluginVersion;
 import selim.core.commands.CommandPluginVersion.TabCompleterPluginVersion;
@@ -25,6 +34,8 @@ import selim.core.leaderboards.ScoreTracker;
 import selim.core.leaderboards.ScoreboardManager;
 import selim.core.util.RecipeUtils;
 import selim.core.util.SemanticVersion;
+import selim.core.util.SignGUI;
+import selim.core.util.SignGUI.SignGUIListener;
 import selim.metrics.Metrics;
 import selim.metrics.Metrics.Graph;
 import selim.versioncontrol.versionhandlers.IVersionHandler;
@@ -40,6 +51,7 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 	protected static Logger LOGGER;
 
 	private static final LinkedList<BukkitTask> TASKS_TO_KILL = new LinkedList<BukkitTask>();
+	private static SignGUI signGUI;
 	// protected static MachineRegistry MACHINE_REGISTRY = new
 	// MachineRegistry();
 
@@ -54,6 +66,13 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 
 	public SemanticVersion getVersion() {
 		return VERSION;
+	}
+
+	private ProtocolManager protocolManager;
+
+	@Override
+	public void onLoad() {
+		protocolManager = ProtocolLibrary.getProtocolManager();
 	}
 
 	@Override
@@ -82,6 +101,8 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		MANAGER = this.getServer().getPluginManager();
 		MANAGER.registerEvents(new EventListener(), this);
 		MANAGER.registerEvents(new ScoreboardManager(), this);
+		signGUI = new SignGUI(this);
+		// createConfig();
 		Config.init(this.getConfig());
 		this.getCommand("viewrecipe").setExecutor(new CommandViewRecipe());
 		this.getCommand("viewrecipe").setTabCompleter(new TabCompleterViewRecipe());
@@ -113,6 +134,20 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 			}
 		}, 1000, 1000));
 		// }, 6000, 6000));
+
+		protocolManager.addPacketListener(
+				new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Client.SETTINGS) {
+
+					@Override
+					public void onPacketReceiving(PacketEvent event) {
+						if (event.getPacketType() != PacketType.Play.Client.SETTINGS)
+							return;
+						for (int i = 0; i < event.getPacket().getStrings().size(); i++) {
+							event.getPlayer()
+									.sendMessage(i + ": " + event.getPacket().getStrings().read(0));
+						}
+					}
+				});
 
 		try {
 			Metrics metrics = new Metrics(this);
@@ -157,6 +192,7 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		INSTANCE = null;
 		LOGGER = null;
 		MANAGER = null;
+		signGUI.destroy();
 		HandlerList.unregisterAll(this);
 		ScoreTracker.saveTrackers();
 		ScoreboardManager.saveScoreboards();
@@ -173,6 +209,23 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 					+ ".");
 		return true;
 	}
+
+	// private void createConfig() {
+	// try {
+	// if (!getDataFolder().exists()) {
+	// getDataFolder().mkdirs();
+	// }
+	// File file = new File(getDataFolder(), "config.yml");
+	// if (!file.exists()) {
+	// getLogger().info("SelimCore config.yml not found, creating!");
+	// MemoryConfiguration config = new MemoryConfiguration();
+	// } else {
+	// getLogger().info("SelimCore config.yml found, loading!");
+	// }
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// }
 
 	public static Logger getCoreLogger() {
 		return LOGGER;
@@ -222,6 +275,24 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 	@Override
 	public int getSpigotResourceId() {
 		return 42405;
+	}
+
+	public static void openSignGUI(Player player, SignGUIListener response) {
+		if (signGUI == null)
+			return;
+		signGUI.open(player, response);
+	}
+
+	public static void openSignGUI(Player player, Location signLocation, SignGUIListener response) {
+		if (signGUI == null)
+			return;
+		signGUI.open(player, signLocation, response);
+	}
+
+	public static void openSignGUI(Player player, String[] defaultText, SignGUIListener response) {
+		if (signGUI == null)
+			return;
+		signGUI.open(player, defaultText, response);
 	}
 
 	// @Override

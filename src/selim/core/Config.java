@@ -1,5 +1,6 @@
 package selim.core;
 
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class Config {

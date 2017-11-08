@@ -1,4 +1,4 @@
-package selim.machines;
+package selim.core.machines;
 
 import java.util.ArrayList;
 import java.util.List;
