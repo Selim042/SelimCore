@@ -1,24 +1,24 @@
 package selim.core.leaderboards;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 public class SignFormat {
 
-//	private final String line1;
+	// private final String line1;
 	private final String line2;
 	private final String line3;
 	private final String line4;
 
-	public SignFormat(/*String line1, */String line2, String line3, String line4) {
-//		this.line1 = line1;
+	public SignFormat(/* String line1, */String line2, String line3, String line4) {
+		// this.line1 = line1;
 		this.line2 = line2;
 		this.line3 = line3;
 		this.line4 = line4;
 	}
 
-//	public String getLine1Format() {
-//		return this.line1;
-//	}
+	// public String getLine1Format() {
+	// return this.line1;
+	// }
 
 	public String getLine2Format() {
 		return this.line2;
@@ -32,9 +32,10 @@ public class SignFormat {
 		return this.line4;
 	}
 
-//	public String formatLine1(Score score, int place, String pluginName, String... extra) {
-//		return format(this.line1, score, place, pluginName, extra);
-//	}
+	// public String formatLine1(Score score, int place, String pluginName,
+	// String... extra) {
+	// return format(this.line1, score, place, pluginName, extra);
+	// }
 
 	public String formatLine2(Score score, int place, String pluginName, String... extra) {
 		return format(this.line2, score, place, pluginName, extra);
@@ -51,18 +52,18 @@ public class SignFormat {
 	private static String format(String line, Score score, int place, String pluginName,
 			String... extra) {
 		if (score != null) {
-			Player player = score.getPlayer();
+			OfflinePlayer player = score.getPlayer();
 			int iScore = score.getScore();
 			if (player != null)
-				line.replace("[[PLAYER]]", player.getDisplayName());
+				line = line.replace("[[PLAYER]]", player.getName());
 			else
-				line.replace("[[PLAYER]]", "");
-			line.replace("[[SCORE]]", Integer.toString(iScore));
+				line = line.replace("[[PLAYER]]", "");
+			line = line.replace("[[SCORE]]", Integer.toString(iScore));
 		}
-		line.replace("[[PLACE]]", getPlaceString(place));
-//		line.replace("[[PLUGIN]]", pluginName);
+		line = line.replace("[[PLACE]]", getPlaceString(place));
+		// line.replace("[[PLUGIN]]", pluginName);
 		for (int i = 0; i < extra.length; i++)
-			line.replace("[[EXTRA" + i + "]]", extra[i]);
+			line = line.replace("[[EXTRA" + i + "]]", extra[i]);
 		return line.contains("[[") ? "" : line;
 	}
 

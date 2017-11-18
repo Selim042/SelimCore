@@ -3,6 +3,7 @@ package selim.core.leaderboards;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class Score implements Comparable<Score> {
@@ -33,8 +34,8 @@ public class Score implements Comparable<Score> {
 		return this.playerUUID;
 	}
 
-	public Player getPlayer() {
-		return Bukkit.getPlayer(this.playerUUID);
+	public OfflinePlayer getPlayer() {
+		return Bukkit.getOfflinePlayer(this.playerUUID);
 	}
 
 	public int updateScore(int data) {

@@ -21,9 +21,9 @@ public class ScoreTracker {
 
 	private final List<Score> SCORES = new LinkedList<Score>();
 	private final String id;
-	private final String pluginName;
-	private final SignFormat format;
-	private final String[] extras;
+	private String pluginName;
+	private SignFormat format;
+	private String[] extras;
 	private boolean updated = false;
 
 	static {
@@ -137,9 +137,17 @@ public class ScoreTracker {
 
 	public static ScoreTracker getTracker(String id, String pluginName, SignFormat format,
 			String... extras) {
-		for (ScoreTracker st : TRACKERS)
-			if (st.id.equals(id))
+		for (ScoreTracker st : TRACKERS) {
+			if (st.id.equals(id)) {
+				if (st.pluginName == null)
+					st.pluginName = pluginName;
+				if (st.format == null)
+					st.format = format;
+				if (st.extras == null)
+					st.extras = extras;
 				return st;
+			}
+		}
 		ScoreTracker tracker = new ScoreTracker(id, pluginName, format, extras);
 		TRACKERS.add(tracker);
 		return tracker;
@@ -163,19 +171,20 @@ public class ScoreTracker {
 			if (file == null || !file.exists() || file.isDirectory()) {} else {
 				try {
 					BufferedReader stream = new BufferedReader(new FileReader(file));
-					String name = file.getName().replaceAll("\\.tracker", "");
-					String pluginName = stream.readLine();
-//					String form1 = stream.readLine();
-					String form2 = stream.readLine();
-					String form3 = stream.readLine();
-					String form4 = stream.readLine();
-					int numExtras = Integer.valueOf(stream.readLine());
-					String[] extras = new String[numExtras];
-					for (int i = 0; i < numExtras; i++)
-						extras[i] = stream.readLine();
+					String id = file.getName().replaceAll("\\.tracker", "");
+//					String pluginName = stream.readLine();
+//					// String form1 = stream.readLine();
+//					String form2 = stream.readLine();
+//					String form3 = stream.readLine();
+//					String form4 = stream.readLine();
+//					int numExtras = Integer.valueOf(stream.readLine());
+//					String[] extras = new String[numExtras];
+//					for (int i = 0; i < numExtras; i++)
+//						extras[i] = stream.readLine();
 					String line = stream.readLine();
-					ScoreTracker tracker = new ScoreTracker(name, pluginName,
-							new SignFormat(/*form1, */form2, form3, form4), extras);
+//					ScoreTracker tracker = new ScoreTracker(id, pluginName,
+//							new SignFormat(/* form1, */form2, form3, form4), extras);
+					ScoreTracker tracker = new ScoreTracker(id);
 					while (line != null && !line.equals("")) {
 						tracker.setScore(UUID.fromString(line.substring(0, line.indexOf(':'))),
 								Integer.valueOf(line.substring(line.indexOf(':') + 1)));
@@ -200,14 +209,15 @@ public class ScoreTracker {
 			} else {
 				try {
 					FileOutputStream stream = new FileOutputStream(file);
-					writeString(stream, tracker.pluginName + '\n');
-//					writeString(stream, tracker.format.getLine1Format() + '\n');
-					writeString(stream, tracker.format.getLine2Format() + '\n');
-					writeString(stream, tracker.format.getLine3Format() + '\n');
-					writeString(stream, tracker.format.getLine4Format() + '\n');
-					writeString(stream, Integer.toString(tracker.extras.length) + '\n');
-					for (int i = 0; i < tracker.extras.length; i++)
-						writeString(stream, tracker.extras[i] + '\n');
+//					writeString(stream, tracker.pluginName + '\n');
+					// writeString(stream, tracker.format.getLine1Format() +
+					// '\n');
+//					writeString(stream, tracker.format.getLine2Format() + '\n');
+//					writeString(stream, tracker.format.getLine3Format() + '\n');
+//					writeString(stream, tracker.format.getLine4Format() + '\n');
+//					writeString(stream, Integer.toString(tracker.extras.length) + '\n');
+//					for (int i = 0; i < tracker.extras.length; i++)
+//						writeString(stream, tracker.extras[i] + '\n');
 					for (Score s : tracker.SCORES)
 						if (s.getUUID() != null)
 							writeString(stream,

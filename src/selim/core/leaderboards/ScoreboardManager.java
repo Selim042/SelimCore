@@ -6,8 +6,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,7 +23,7 @@ import selim.core.events.GameTickEvent;
 public class ScoreboardManager implements Listener {
 
 	private static final File BOARDS_FOLDER;
-	private static final List<Scoreboard> BOARDS = new LinkedList<Scoreboard>();
+	private static final List<Scoreboard> BOARDS = new CopyOnWriteArrayList<Scoreboard>();
 
 	static {
 		File temp = SelimCore.getPlugin(SelimCore.class).getDataFolder();

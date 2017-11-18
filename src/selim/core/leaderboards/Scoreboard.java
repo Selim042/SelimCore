@@ -2,12 +2,12 @@ package selim.core.leaderboards;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
-import org.bukkit.entity.Player;
 
 import selim.core.Helper;
 
@@ -44,7 +44,7 @@ public class Scoreboard {
 	public void update() {
 		ScoreTracker tracker = ScoreTracker.getTracker(this.id);
 		Score score = tracker.getPlace(this.place);
-		Player player = null;
+		OfflinePlayer player = null;
 		if (score != null)
 			player = score.getPlayer();
 		Block signBlock = loc.getBlock();
