@@ -96,7 +96,6 @@ public class ScoreboardManager implements Listener {
 					if (file != null)
 						file.createNewFile();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				// return;
@@ -107,7 +106,9 @@ public class ScoreboardManager implements Listener {
 					writeString(stream, board.getTrackerID() + '\n');
 					writeString(stream, Integer.toString(board.getPlace()));
 					stream.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

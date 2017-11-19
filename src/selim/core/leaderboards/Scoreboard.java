@@ -50,6 +50,8 @@ public class Scoreboard {
 		Block signBlock = loc.getBlock();
 		if (signBlock.getType() == Material.WALL_SIGN) {
 			Sign sign = (Sign) signBlock.getState();
+			if (sign == null)
+				return;
 			SignFormat format = tracker.getFormat();
 			String pluginName = tracker.getPluginName();
 			String[] extras = tracker.getExtras();
