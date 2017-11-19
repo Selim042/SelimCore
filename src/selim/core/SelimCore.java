@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitTask;
-import org.sqlite.SQLite;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -110,6 +109,8 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		this.getCommand("pluginversion").setTabCompleter(new TabCompleterPluginVersion());
 		this.getCommand("setupscoreboard").setExecutor(new CommandSetupScoreboard());
 		this.getCommand("setupscoreboard").setTabCompleter(new TabCompleterSetupScoreboard());
+//		this.getCommand("scoreinfo").setExecutor(new CommandScoreInfo());
+//		this.getCommand("scoreinfo").setTabCompleter(new TabCompleterScoreInfo());
 		RecipeUtils.initRecipes();
 		ScoreTracker.loadTrackers();
 		ScoreboardManager.loadScoreboards();
@@ -194,11 +195,10 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		MANAGER = null;
 		signGUI.destroy();
 		HandlerList.unregisterAll(this);
-		ScoreTracker.saveTrackers();
-		ScoreboardManager.saveScoreboards();
-
 		for (BukkitTask task : TASKS_TO_KILL)
 			task.cancel();
+		ScoreTracker.saveTrackers();
+		ScoreboardManager.saveScoreboards();
 	}
 
 	@Override

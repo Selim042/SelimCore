@@ -53,6 +53,8 @@ public class Scoreboard {
 			if (sign == null)
 				return;
 			SignFormat format = tracker.getFormat();
+			if (format == null)
+				return;
 			String pluginName = tracker.getPluginName();
 			String[] extras = tracker.getExtras();
 			sign.setLine(0, "[" + tracker.getPluginName() + "]");
