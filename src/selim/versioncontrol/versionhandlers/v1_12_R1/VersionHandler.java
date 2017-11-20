@@ -10,12 +10,13 @@ import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
-import org.bukkit.craftbukkit.v1_12_R1.generator.CraftChunkData;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
-import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.material.MaterialData;
 
 import net.minecraft.server.v1_12_R1.BlockPosition;
@@ -30,6 +31,7 @@ import net.minecraft.server.v1_12_R1.Item;
 import net.minecraft.server.v1_12_R1.MinecraftServer;
 import net.minecraft.server.v1_12_R1.PacketPlayOutCloseWindow;
 import net.minecraft.server.v1_12_R1.PacketPlayOutOpenWindow;
+import selim.core.util.StringIDHelper;
 import selim.versioncontrol.versionhandlers.IVersionHandler;
 
 @SuppressWarnings("unused")
@@ -64,7 +66,7 @@ public class VersionHandler implements IVersionHandler {
 
 	@Override
 	public boolean doesItemHaveSubtypes(Block block) {
-		return doesItemHaveSubtypes(block.getState().getData().toItemStack());
+		return doesItemHaveSubtypes(block.getState().getData().toItemStack(1));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -93,8 +95,13 @@ public class VersionHandler implements IVersionHandler {
 	}
 
 	@Override
-	public ChunkData getChunkData(World world) {
-		return new CraftChunkData(world);
+	public String getRecipeName(Recipe recipe) {
+		if (recipe instanceof ShapedRecipe)
+			return ((ShapedRecipe) recipe).getKey().toString();
+		else if (recipe instanceof ShapelessRecipe)
+			return ((ShapelessRecipe) recipe).getKey().toString();
+		else
+			return StringIDHelper.getIDForMat(recipe.getResult().getType());
 	}
 
 	@SuppressWarnings("deprecation")

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.material.MaterialData;
 
 public interface IVersionHandler {
@@ -32,7 +33,7 @@ public interface IVersionHandler {
 
 	public String getItemName(MaterialData data);
 
-	public ChunkData getChunkData(World world);
+	public String getRecipeName(Recipe recipe);
 
     /**
      * Gets the next available NMS container id for the player

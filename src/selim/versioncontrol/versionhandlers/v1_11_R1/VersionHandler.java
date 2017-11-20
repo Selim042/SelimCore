@@ -16,6 +16,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.material.MaterialData;
 
 import net.minecraft.server.v1_11_R1.BlockPosition;
@@ -30,6 +33,7 @@ import net.minecraft.server.v1_11_R1.Item;
 import net.minecraft.server.v1_11_R1.MinecraftServer;
 import net.minecraft.server.v1_11_R1.PacketPlayOutCloseWindow;
 import net.minecraft.server.v1_11_R1.PacketPlayOutOpenWindow;
+import selim.core.util.StringIDHelper;
 import selim.versioncontrol.versionhandlers.IVersionHandler;
 
 @SuppressWarnings("unused")
@@ -92,8 +96,8 @@ public class VersionHandler implements IVersionHandler {
 	}
 
 	@Override
-	public ChunkData getChunkData(World world) {
-		return new CraftChunkData(world);
+	public String getRecipeName(Recipe recipe) {
+		return StringIDHelper.getIDForMat(recipe.getResult().getType());
 	}
 
 	@SuppressWarnings("deprecation")
