@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
@@ -14,45 +13,49 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+
+import selim.core.SelimCore;
+import selim.core.recipes.CoreRecipe;
+import selim.core.recipes.CoreShapedRecipe;
+import selim.core.recipes.CoreShapelessRecipe;
 
 public class RecipeUtils {
 
 	public static final String RECIPE_INV_NAME = "Recipe";
 
-	private static final HashMap<String, List<Recipe>> NAMED_RECIPES = new HashMap<String, List<Recipe>>();
+	private static final HashMap<String, List<CoreRecipe>> NAMED_RECIPES = new HashMap<String, List<CoreRecipe>>();
+	// private static final List<CoreRecipe> RECIPE_TYPES = new
+	// LinkedList<CoreRecipe>();
 	private static boolean initilized = false;
 
-	public static Recipe getRecipe(String name) {
+	public static CoreRecipe getRecipe(String name) {
 		return getRecipe(name, 0);
 	}
 
-	public static Recipe getRecipe(String name, int pos) {
+	public static CoreRecipe getRecipe(String name, int pos) {
 		if (!NAMED_RECIPES.containsKey(name))
 			return null;
-		List<Recipe> recipes = NAMED_RECIPES.get(name);
+		List<CoreRecipe> recipes = NAMED_RECIPES.get(name);
 		if (pos < recipes.size())
 			return NAMED_RECIPES.get(name).get(pos);
 		return null;
 	}
 
-	public static List<Recipe> getRecipes(String name) {
+	public static List<CoreRecipe> getRecipes(String name) {
 		if (!NAMED_RECIPES.containsKey(name))
 			return null;
-		return new LinkedList<Recipe>(NAMED_RECIPES.get(name));
+		return new LinkedList<CoreRecipe>(NAMED_RECIPES.get(name));
 	}
 
 	public static String getRecipeName(Recipe recipe) {
-		for (Entry<String, List<Recipe>> e : NAMED_RECIPES.entrySet())
+		for (Entry<String, List<CoreRecipe>> e : NAMED_RECIPES.entrySet())
 			for (Recipe r : e.getValue())
 				if (r.equals(recipe))
 					return e.getKey();
@@ -97,87 +100,45 @@ public class RecipeUtils {
 		return viewRecipe(player, getRecipe(name, num));
 	}
 
-	public static boolean viewRecipe(Player player, Recipe recipe) {
+	public static boolean viewRecipe(Player player, CoreRecipe recipe) {
 		if (recipe == null)
 			return false;
-		Inventory recipeInv = null;
-		if (recipe instanceof ShapedRecipe) {
-			ShapedRecipe shapedRecipe = (ShapedRecipe) recipe;
-			recipeInv = Bukkit.createInventory(null, InventoryType.WORKBENCH, RECIPE_INV_NAME);
-			Map<Character, ItemStack> map = shapedRecipe.getIngredientMap();
-			for (int row = 0; row < shapedRecipe.getShape().length; row++) {
-				String rowS = shapedRecipe.getShape()[row];
-				for (int col = 0; col < rowS.length(); col++) {
-					ItemStack stack = map.get(rowS.charAt(col));
-					recipeInv.setItem(((row * 3) + 1) + col, stack);
-				}
-			}
-			ItemStack stack = shapedRecipe.getResult();
-			recipeInv.setItem(0, stack);
-		} else if (recipe instanceof ShapelessRecipe) {
-			ShapelessRecipe shapelessRecipe = (ShapelessRecipe) recipe;
-			recipeInv = Bukkit.createInventory(null, InventoryType.WORKBENCH, RECIPE_INV_NAME);
-			ItemStack result = shapelessRecipe.getResult().clone();
-			if (result != null) {
-				result = result.clone();
-				ItemMeta meta = result.getItemMeta();
-				List<String> lore = meta.getLore();
-				if (lore == null)
-					lore = new LinkedList<String>();
-				lore.add("This recipe is shapeless.");
-				meta.setLore(lore);
-				result.setItemMeta(meta);
-			}
-			recipeInv.setItem(0, result);
-			for (ItemStack ing : shapelessRecipe.getIngredientList()) {
-				ItemStack stack = ing.clone();
-				if (stack != null) {
-					stack = stack.clone();
-					ItemMeta meta = stack.getItemMeta();
-					List<String> lore = meta.getLore();
-					if (lore == null)
-						lore = new LinkedList<String>();
-					lore.add("This recipe is shapeless.");
-					meta.setLore(lore);
-					stack.setItemMeta(meta);
-				}
-				recipeInv.addItem(stack);
-			}
-			// CraftingInventory craftingRecipeInv = (CraftingInventory)
-			// Bukkit.createInventory(null,
-			// InventoryType.CRAFTING, RECIPE_INV_NAME);
-			// for (ItemStack ing : shapelessRecipe.getIngredientList())
-			// craftingRecipeInv.addItem(ing);
-			// craftingRecipeInv.setResult(shapelessRecipe.getResult());
-			// recipeInv = craftingRecipeInv;
-		} else if (recipe instanceof FurnaceRecipe) {
-			FurnaceRecipe furnaceRecipe = (FurnaceRecipe) recipe;
-			recipeInv = Bukkit.createInventory(null, InventoryType.FURNACE, RECIPE_INV_NAME);
-			recipeInv.setItem(2, furnaceRecipe.getResult());
-			recipeInv.setItem(0, furnaceRecipe.getInput());
-		}
+		Inventory recipeInv = recipe.viewRecipe();
 		if (recipeInv == null)
 			return false;
 		player.openInventory(recipeInv);
 		Bukkit.getPluginManager().callEvent(new InventoryClickEvent(player.getOpenInventory(),
 				SlotType.RESULT, 0, ClickType.RIGHT, InventoryAction.PICKUP_ALL));
+		player.sendMessage(recipe.getClass().getName());
+		for (int i = 0; i < recipeInv.getSize(); i++) {
+			ItemStack s = recipeInv.getItem(i);
+			player.sendMessage(i + ": " + s);
+		}
 		return true;
 	}
 
+	@Deprecated
+	/**
+	 * @deprecated Use {@link #registerCoreShapedRecipe()} instead.
+	 */
 	public static ShapedRecipe registerShapedRecipe(String name, ItemStack output, String row1,
 			String row2, String row3, Object... info) {
-		ShapedRecipe recipe = registerShapedRecipe(output, row1, row2, row3, info);
-		List<Recipe> recipes = NAMED_RECIPES.get(name);
+		CoreShapedRecipe recipe = registerCoreShapedRecipe(output, row1, row2, row3, info);
+		List<CoreRecipe> recipes = NAMED_RECIPES.get(name);
 		if (recipes == null)
-			recipes = new LinkedList<Recipe>();
+			recipes = new LinkedList<CoreRecipe>();
 		recipes.add(recipe);
 		NAMED_RECIPES.put(name, recipes);
 		return recipe;
 	}
 
+	@Deprecated
+	/**
+	 * @deprecated Use {@link #registerCoreShapedRecipe()} instead.
+	 */
 	public static ShapedRecipe registerShapedRecipe(ItemStack output, String row1, String row2,
 			String row3, Object... info) {
-		ShapedRecipe recipe = new ShapedRecipe(output);
+		CoreShapedRecipe recipe = new CoreShapedRecipe(output);
 		recipe.shape(row1, row2, row3);
 		for (int i = 0; i < info.length; i += 2) {
 			if (info[i] instanceof Character && info[i + 1] instanceof ItemStack) {
@@ -191,17 +152,25 @@ public class RecipeUtils {
 		return recipe;
 	}
 
+	@Deprecated
+	/**
+	 * @deprecated Use {@link #registerCoreShapelessRecipe()} instead.
+	 */
 	public static ShapelessRecipe registerShapelessRecipe(String name, ItemStack output,
 			Object... info) {
-		ShapelessRecipe recipe = registerShapelessRecipe(output, info);
-		List<Recipe> recipes = NAMED_RECIPES.get(name);
+		CoreShapelessRecipe recipe = registerCoreShapelessRecipe(output, info);
+		List<CoreRecipe> recipes = NAMED_RECIPES.get(name);
 		if (recipes == null)
-			recipes = new LinkedList<Recipe>();
+			recipes = new LinkedList<CoreRecipe>();
 		recipes.add(recipe);
 		NAMED_RECIPES.put(name, recipes);
 		return recipe;
 	}
 
+	@Deprecated
+	/**
+	 * @deprecated Use {@link #registerCoreShapelessRecipe()} instead.
+	 */
 	public static ShapelessRecipe registerShapelessRecipe(ItemStack output, Object... info) {
 		ShapelessRecipe recipe = new ShapelessRecipe(output);
 		for (Object obj : info) {
@@ -216,14 +185,80 @@ public class RecipeUtils {
 		return recipe;
 	}
 
+	public static CoreShapedRecipe registerCoreShapedRecipe(String name, ItemStack output, String row1,
+			String row2, String row3, Object... info) {
+		CoreShapedRecipe recipe = registerCoreShapedRecipe(output, row1, row2, row3, info);
+		List<CoreRecipe> recipes = NAMED_RECIPES.get(name);
+		if (recipes == null)
+			recipes = new LinkedList<CoreRecipe>();
+		recipes.add(recipe);
+		NAMED_RECIPES.put(name, recipes);
+		return recipe;
+	}
+
+	public static CoreShapedRecipe registerCoreShapedRecipe(ItemStack output, String row1, String row2,
+			String row3, Object... info) {
+		CoreShapedRecipe recipe = new CoreShapedRecipe(output);
+		recipe.shape(row1, row2, row3);
+		for (int i = 0; i < info.length; i += 2) {
+			if (info[i] instanceof Character && info[i + 1] instanceof ItemStack) {
+				ItemStack stack = (ItemStack) info[i + 1];
+				recipe.setIngredient((Character) info[i], stack.getData());
+			} else if (info[i] instanceof Character && info[i + 1] instanceof Material) {
+				recipe.setIngredient((Character) info[i], (Material) info[i + 1]);
+			}
+		}
+		Bukkit.getServer().addRecipe(recipe);
+		return recipe;
+	}
+
+	public static CoreShapelessRecipe registerCoreShapelessRecipe(String name, ItemStack output,
+			Object... info) {
+		CoreShapelessRecipe recipe = registerCoreShapelessRecipe(output, info);
+		List<CoreRecipe> recipes = NAMED_RECIPES.get(name);
+		if (recipes == null)
+			recipes = new LinkedList<CoreRecipe>();
+		recipes.add(recipe);
+		NAMED_RECIPES.put(name, recipes);
+		return recipe;
+	}
+
+	public static CoreShapelessRecipe registerCoreShapelessRecipe(ItemStack output, Object... info) {
+		CoreShapelessRecipe recipe = new CoreShapelessRecipe(output);
+		for (Object obj : info) {
+			if (obj instanceof MaterialData)
+				recipe.addIngredient((MaterialData) obj);
+			else if (obj instanceof Material)
+				recipe.addIngredient((Material) obj);
+			else if (obj instanceof ItemStack)
+				recipe.addIngredient(((ItemStack) obj).getData());
+		}
+		Bukkit.getServer().addRecipe(recipe);
+		return recipe;
+	}
+
+	public static <T extends CoreRecipe> T registerCoreRecipe(String name, T recipe) {
+		List<CoreRecipe> recipes = NAMED_RECIPES.get(name);
+		if (recipes == null)
+			recipes = new LinkedList<CoreRecipe>();
+		recipes.add(recipe);
+		NAMED_RECIPES.put(name, recipes);
+		return recipe;
+	}
+
+	public static <T extends CoreRecipe> T registerCoreRecipe(T recipe) {
+		Bukkit.getServer().addRecipe(recipe);
+		return recipe;
+	}
+
 	/**
 	 * Disables all recipes resulting in the given ItemStack
 	 */
 	public static void disableRecipe(ItemStack result) {
-		for (Entry<String, List<Recipe>> s : NAMED_RECIPES.entrySet()) {
+		for (Entry<String, List<CoreRecipe>> s : NAMED_RECIPES.entrySet()) {
 			for (Recipe r : s.getValue()) {
 				if (r.getResult().isSimilar(result)) {
-					List<Recipe> recipes = s.getValue();
+					List<CoreRecipe> recipes = s.getValue();
 					recipes.remove(r);
 					s.setValue(recipes);
 				}
@@ -244,11 +279,11 @@ public class RecipeUtils {
 		Iterator<Recipe> rIt = Bukkit.recipeIterator();
 		while (rIt.hasNext()) {
 			Recipe r = rIt.next();
-			String id = StringIDHelper.getIDForMat(r.getResult().getType());
-			List<Recipe> recipes = NAMED_RECIPES.get(id);
+			String id = SelimCore.getVersionHandler().getRecipeName(r);
+			List<CoreRecipe> recipes = NAMED_RECIPES.get(id);
 			if (recipes == null)
-				recipes = new LinkedList<Recipe>();
-			recipes.add(r);
+				recipes = new LinkedList<CoreRecipe>();
+			recipes.add(CoreRecipe.fromVanillaRecipe(r));
 			NAMED_RECIPES.put(id, recipes);
 		}
 		initilized = true;
