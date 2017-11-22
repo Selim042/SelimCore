@@ -2,40 +2,17 @@ package selim.core.leaderboards;
 
 import org.bukkit.OfflinePlayer;
 
-public class SignFormat {
+import selim.core.SignFormat;
 
-	// private final String line1;
-	private final String line2;
-	private final String line3;
-	private final String line4;
+public class ScoreboardSignFormat extends SignFormat {
 
-	public SignFormat(/* String line1, */String line2, String line3, String line4) {
-		// this.line1 = line1;
-		this.line2 = line2;
-		this.line3 = line3;
-		this.line4 = line4;
+	public ScoreboardSignFormat(String line2, String line3, String line4) {
+		super(null, line2, line3, line4);
 	}
 
-	// public String getLine1Format() {
-	// return this.line1;
-	// }
-
-	public String getLine2Format() {
-		return this.line2;
+	public String formatLine1(Score score, int place, String pluginName, String... extra) {
+		return format(this.line1, score, place, pluginName, extra);
 	}
-
-	public String getLine3Format() {
-		return this.line3;
-	}
-
-	public String getLine4Format() {
-		return this.line4;
-	}
-
-	// public String formatLine1(Score score, int place, String pluginName,
-	// String... extra) {
-	// return format(this.line1, score, place, pluginName, extra);
-	// }
 
 	public String formatLine2(Score score, int place, String pluginName, String... extra) {
 		return format(this.line2, score, place, pluginName, extra);

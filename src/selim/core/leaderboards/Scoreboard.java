@@ -52,7 +52,7 @@ public class Scoreboard {
 			Sign sign = (Sign) signBlock.getState();
 			if (sign == null)
 				return;
-			SignFormat format = tracker.getFormat();
+			ScoreboardSignFormat format = tracker.getFormat();
 			if (format == null)
 				return;
 			String pluginName = tracker.getPluginName();

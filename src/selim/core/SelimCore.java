@@ -10,25 +10,22 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-
 import selim.core.commands.CommandPluginVersion;
 import selim.core.commands.CommandPluginVersion.TabCompleterPluginVersion;
+import selim.core.commands.CommandSetupGameSign;
+import selim.core.commands.CommandSetupGameSign.TabCompleterSetupGameSign;
 import selim.core.commands.CommandSetupScoreboard;
 import selim.core.commands.CommandSetupScoreboard.TabCompleterSetupScoreboard;
 import selim.core.commands.CommandViewRecipe;
 import selim.core.commands.CommandViewRecipe.TabCompleterViewRecipe;
 import selim.core.events.GameTickEvent;
 import selim.core.events.PluginsLoadedEvent;
+import selim.core.games.GameSignManager;
 import selim.core.leaderboards.ScoreTracker;
 import selim.core.leaderboards.ScoreboardManager;
 import selim.core.util.RecipeUtils;
@@ -67,12 +64,12 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		return VERSION;
 	}
 
-	private ProtocolManager protocolManager;
+	// private ProtocolManager protocolManager;
 
-	@Override
-	public void onLoad() {
-		protocolManager = ProtocolLibrary.getProtocolManager();
-	}
+	// @Override
+	// public void onLoad() {
+	// protocolManager = ProtocolLibrary.getProtocolManager();
+	// }
 
 	@Override
 	public void onEnable() {
@@ -100,6 +97,7 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		MANAGER = this.getServer().getPluginManager();
 		MANAGER.registerEvents(new EventListener(), this);
 		MANAGER.registerEvents(new ScoreboardManager(), this);
+		MANAGER.registerEvents(new GameSignManager(), this);
 		signGUI = new SignGUI(this);
 		// createConfig();
 		Config.init(this.getConfig());
@@ -109,8 +107,11 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 		this.getCommand("pluginversion").setTabCompleter(new TabCompleterPluginVersion());
 		this.getCommand("setupscoreboard").setExecutor(new CommandSetupScoreboard());
 		this.getCommand("setupscoreboard").setTabCompleter(new TabCompleterSetupScoreboard());
-//		this.getCommand("scoreinfo").setExecutor(new CommandScoreInfo());
-//		this.getCommand("scoreinfo").setTabCompleter(new TabCompleterScoreInfo());
+		this.getCommand("setupgamesign").setExecutor(new CommandSetupGameSign());
+		this.getCommand("setupgamesign").setTabCompleter(new TabCompleterSetupGameSign());
+		// this.getCommand("scoreinfo").setExecutor(new CommandScoreInfo());
+		// this.getCommand("scoreinfo").setTabCompleter(new
+		// TabCompleterScoreInfo());
 		RecipeUtils.initRecipes();
 		ScoreTracker.loadTrackers();
 		ScoreboardManager.loadScoreboards();
@@ -135,20 +136,6 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 			}
 		}, 1000, 1000));
 		// }, 6000, 6000));
-
-		protocolManager.addPacketListener(
-				new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Client.SETTINGS) {
-
-					@Override
-					public void onPacketReceiving(PacketEvent event) {
-						if (event.getPacketType() != PacketType.Play.Client.SETTINGS)
-							return;
-						for (int i = 0; i < event.getPacket().getStrings().size(); i++) {
-							event.getPlayer()
-									.sendMessage(i + ": " + event.getPacket().getStrings().read(0));
-						}
-					}
-				});
 
 		try {
 			Metrics metrics = new Metrics(this);
@@ -199,6 +186,7 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 			task.cancel();
 		ScoreTracker.saveTrackers();
 		ScoreboardManager.saveScoreboards();
+		GameSignManager.saveGameSigns();
 	}
 
 	@Override
@@ -229,6 +217,10 @@ public class SelimCore extends SelimCorePlugin /* implements IEnergyPlugin */ {
 
 	public static Logger getCoreLogger() {
 		return LOGGER;
+	}
+
+	public static void callEvent(Event event) {
+		MANAGER.callEvent(event);
 	}
 
 	public static void debug(String str) {

@@ -22,7 +22,7 @@ public class ScoreTracker {
 	private final List<Score> SCORES = new LinkedList<Score>();
 	private final String id;
 	private String pluginName;
-	private SignFormat format;
+	private ScoreboardSignFormat format;
 	private String[] extras;
 	private boolean updated = false;
 
@@ -40,11 +40,11 @@ public class ScoreTracker {
 		this(id, null, null);
 	}
 
-	private ScoreTracker(String id, SignFormat format) {
+	private ScoreTracker(String id, ScoreboardSignFormat format) {
 		this(id, null, format);
 	}
 
-	private ScoreTracker(String id, String pluginName, SignFormat format, String... extras) {
+	private ScoreTracker(String id, String pluginName, ScoreboardSignFormat format, String... extras) {
 		this.id = id;
 		this.pluginName = pluginName;
 		this.format = format;
@@ -66,7 +66,7 @@ public class ScoreTracker {
 		return this.pluginName;
 	}
 
-	public SignFormat getFormat() {
+	public ScoreboardSignFormat getFormat() {
 		return this.format;
 	}
 
@@ -135,7 +135,7 @@ public class ScoreTracker {
 		return null;
 	}
 
-	public static ScoreTracker getTracker(String id, String pluginName, SignFormat format,
+	public static ScoreTracker getTracker(String id, String pluginName, ScoreboardSignFormat format,
 			String... extras) {
 		for (ScoreTracker st : TRACKERS) {
 			if (st.id.equals(id)) {

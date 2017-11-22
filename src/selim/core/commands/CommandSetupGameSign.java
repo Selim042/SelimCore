@@ -17,15 +17,15 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import selim.core.Helper;
-import selim.core.leaderboards.ScoreTracker;
-import selim.core.leaderboards.Scoreboard;
-import selim.core.leaderboards.ScoreboardManager;
+import selim.core.games.Game;
+import selim.core.games.GameSign;
+import selim.core.games.GameSignManager;
 
-public class CommandSetupScoreboard implements CommandExecutor {
+public class CommandSetupGameSign implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (!sender.hasPermission("selimCore:setupScoreboard")) {
+		if (!sender.hasPermission("selimCore:setupGameSign")) {
 			sender.sendMessage(ChatColor.RED + "You do not have permission to execute this command.");
 			return true;
 		}
@@ -33,15 +33,17 @@ public class CommandSetupScoreboard implements CommandExecutor {
 			sender.sendMessage(ChatColor.RED + "Command must be executed by a player.");
 			return true;
 		}
-		if (args.length != 6) {
+		if (args.length != 5) {
 			sender.sendMessage(ChatColor.RED + "Usage: " + command.getUsage());
 			return true;
 		}
 		try {
 			Player player = (Player) sender;
-			ScoreTracker tracker = ScoreTracker.getTracker(args[0]);
-			if (tracker == null) {
-				sender.sendMessage(ChatColor.RED + "Invalid tracker ID: " + args[0]);
+			String gameId = args[0].substring(0, args[0].indexOf(":"));
+			String mapId = args[0].substring(args[0].indexOf(":") + 1);
+			Game game = Game.getGame(gameId, mapId);
+			if (game == null) {
+				sender.sendMessage(ChatColor.RED + "Invalid game ID: " + args[0]);
 				return true;
 			}
 			int x = Integer.valueOf(args[1]);
@@ -49,11 +51,10 @@ public class CommandSetupScoreboard implements CommandExecutor {
 			int z = Integer.valueOf(args[3]);
 			Location loc = new Location(player.getWorld(), x, y, z);
 			BlockFace facing = BlockFace.valueOf(args[4].toUpperCase());
-			int place = Integer.valueOf(args[5]);
-			Scoreboard board = new Scoreboard(loc, facing, tracker.getID(), place);
-			ScoreboardManager.addScoreboard(board);
-			sender.sendMessage("Scoreboard added.");
-			tracker.setUpdated(true);
+			GameSign sign = new GameSign(loc, facing, game);
+			GameSignManager.addGameSign(sign);
+			sender.sendMessage("Game sign added.");
+			sign.update();
 		} catch (NumberFormatException e) {
 			sender.sendMessage(ChatColor.RED + "Usage: " + command.getUsage());
 			return true;
@@ -61,14 +62,14 @@ public class CommandSetupScoreboard implements CommandExecutor {
 		return true;
 	}
 
-	public static class TabCompleterSetupScoreboard implements TabCompleter {
+	public static class TabCompleterSetupGameSign implements TabCompleter {
 
 		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias,
 				String[] args) {
 			switch (args.length) {
 			case 1:
-				List<String> possibleResults = ScoreTracker.getTrackerIDs();
+				List<String> possibleResults = Game.getFullMapIds();
 				List<String> results = new ArrayList<String>();
 				for (String name : possibleResults)
 					if (name != null && name.matches("(?i)(" + args[0] + ").*"))

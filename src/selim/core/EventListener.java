@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -20,6 +21,8 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 import selim.core.events.PluginsLoadedEvent;
+import selim.core.games.Game;
+import selim.core.games.GameSignManager;
 import selim.core.util.RecipeUtils;
 import selim.core.util.SemanticVersion;
 import selim.core.util.VersionChecker;
@@ -48,8 +51,7 @@ public class EventListener implements Listener {
 					if (pluginReqVersion.compareTo(coreVersion) != -1) {
 						SelimCore.LOGGER.log(Level.SEVERE,
 								"Disabled " + sp.getName() + ", requires at least SelimCore version "
-										+ pluginReqVersion + ", " + coreVersion
-										+ " is supplied.");
+										+ pluginReqVersion + ", " + coreVersion + " is supplied.");
 						SelimCore.MANAGER.disablePlugin(sp);
 						disabledPlugins.add(sp);
 					} else
@@ -69,6 +71,8 @@ public class EventListener implements Listener {
 				// }
 			}
 		}
+
+		GameSignManager.loadGameSigns();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -117,6 +121,12 @@ public class EventListener implements Listener {
 				return;
 			}
 		}
+	}
+
+	@EventHandler
+	public void onPlayerLeave(PlayerQuitEvent event) {
+		for (Game game : Game.getAllGames())
+			game.removePlayer(event.getPlayer());
 	}
 
 }

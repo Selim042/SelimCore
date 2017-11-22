@@ -12,3 +12,6 @@ commands:
   setupscoreboard:
     description: Sets up a display scoreboard for supported plugins.
     usage: /setupscoreboard <scoreboardID> <x> <y> <z> <face> <place>
+  setupgamesign:
+    description: Sets up a display game sign for supported plugins.
+    usage: /setupgamesign <gameID> <x> <y> <z> <face>

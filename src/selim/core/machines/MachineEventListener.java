@@ -19,7 +19,6 @@ import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 import selim.core.events.GameTickEvent;
 import selim.core.events.PluginsLoadedEvent;
-import selim.core.machines.test.MachineFurnace;
 
 public class MachineEventListener implements Listener {
 
